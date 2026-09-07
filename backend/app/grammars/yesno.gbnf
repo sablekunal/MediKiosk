@@ -1,0 +1,2 @@
+root ::= "{\"value\":" boolean "}"
+boolean ::= "\"yes\"" | "\"no\""

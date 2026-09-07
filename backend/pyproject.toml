@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medikiosk-backend"
+version = "0.1.0"
+description = "Deterministic, FHIR R4-capable clinical intake backend for MediKiosk Variant C"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1.0",
+  "uvicorn[standard]>=0.30,<1.0",
+  "pydantic>=2.8,<3.0",
+  "pydantic-settings>=2.4,<3.0",
+  "sqlalchemy[asyncio]>=2.0,<3.0",
+  "aiosqlite>=0.20,<1.0",
+  "fhir.resources>=7.1,<8.0",
+  "python-multipart>=0.0.12,<1.0",
+  "llama-cpp-python>=0.3.35"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "httpx>=0.27", "ruff>=0.6"]
+llm = ["llama-cpp-python>=0.3,<1.0"]
+services = [
+  "faster-whisper>=1.1,<2.0",
+  "piper-tts>=1.2,<2.0",
+  "paddleocr>=3.0,<4.0",
+  "paddlepaddle>=3.0,<4.0",
+  "Pillow>=10.0,<12.0",
+  "huggingface-hub>=0.26,<1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

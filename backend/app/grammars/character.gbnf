@@ -1,0 +1,2 @@
+root ::= "{\"value\":" character "}"
+character ::= "\"sharp\"" | "\"dull\"" | "\"throbbing\"" | "\"burning\"" | "\"aching\"" | "\"colicky\""
