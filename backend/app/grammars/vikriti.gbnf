@@ -1,0 +1,2 @@
+root ::= "{\"value\":" dosha "}"
+dosha ::= "\"Vata\"" | "\"Pitta\"" | "\"Kapha\"" | "\"Vata-Pitta\"" | "\"Pitta-Kapha\"" | "\"Kapha-Vata\"" | "\"Sannipata\""
