@@ -1,0 +1,2 @@
+# agni.gbnf — for agni / digestive capacity (Dashavidha)
+root ::= "manda" | "tikshna" | "sama" | "vishama"

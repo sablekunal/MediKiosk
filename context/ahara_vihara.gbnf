@@ -1,0 +1,10 @@
+# ahara_vihara.gbnf — for ahara_vihara / diet & lifestyle (Dashavidha)
+# JSON array of strings, at least one item (unlike associations, this is
+# never legitimately empty — every patient has some diet/lifestyle pattern).
+root    ::= "[" ws item (ws "," ws item)* ws "]"
+item    ::= "\"" factor "\""
+factor  ::= "diet_veg" | "diet_nonveg" | "diet_mixed"
+          | "sleep_disturbed" | "sleep_normal"
+          | "sedentary" | "active"
+          | "stress_high" | "stress_low" | "other"
+ws      ::= [ \t]*

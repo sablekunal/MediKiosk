@@ -1,0 +1,7 @@
+# body_location.gbnf — for site (SOCRATES) and radiation_location
+root ::= "head" | "neck" | "chest"
+       | "abdomen_upper" | "abdomen_lower_left" | "abdomen_lower_right" | "abdomen_diffuse"
+       | "back_upper" | "back_lower" | "pelvis"
+       | "arm_left" | "arm_right" | "leg_left" | "leg_right"
+       | "joint_knee" | "joint_shoulder" | "joint_hip"
+       | "whole_body" | "other"

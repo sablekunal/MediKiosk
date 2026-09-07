@@ -1,0 +1,2 @@
+# character.gbnf — for character (SOCRATES)
+root ::= "sharp" | "dull" | "burning" | "cramping" | "throbbing" | "other"

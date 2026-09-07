@@ -1,0 +1,164 @@
+# SOCRATES history-taking tree — generic, symptom-agnostic
+# Consumed by tree_engine/engine.py as a state machine:
+#   (current_node_id, slot_value) -> next_node_id
+#
+# Node types:
+#   slot_fill   — LLM fills one slot in `history[].slots`, constrained by `grammar`
+#   branch      — deterministic branch on the just-filled slot's value, no LLM call
+#   rule        — deterministic rule evaluation against slots filled so far;
+#                 writes to `red_flags[]` / `triage`, never itself asks the patient anything
+#   terminal    — end of this tree; hand off to next tree or to summary generation
+#
+# `question.*` keys are BCP-47 language codes. Add more as language coverage grows;
+# engine falls back to `en` if the encounter's `language` isn't present.
+
+tree_id: socrates_generic_v1
+description: >
+  Generic SOCRATES history-taking tree, usable for any single presenting
+  complaint. Fills history[].slots for one complaint_id per pass.
+entry_node: site
+
+nodes:
+
+  site:
+    type: slot_fill
+    slot: site
+    question:
+      en: "Where exactly do you feel the problem?"
+      hi: "aapko dikkat sharir ke kis hisse mein ho rahi hai?"
+      mr: "tumhala tras sharirachya konatya bhagat hoto ahe?"
+    input_type: body_location
+    grammar: body_location.gbnf
+    next: onset
+
+  onset:
+    type: slot_fill
+    slot: onset
+    question:
+      en: "When did it start, and did it come on suddenly or gradually?"
+      hi: "yeh kab shuru hua, aur achanak shuru hua ya dheere dheere?"
+      mr: "he kadhi suru zhale, ani achanak ki hळू hळू?"
+    input_type: duration_onset
+    grammar: duration.gbnf
+    next: character
+
+  character:
+    type: slot_fill
+    slot: character
+    question:
+      en: "How would you describe the feeling — sharp, dull, burning, cramping, throbbing?"
+      hi: "dard kaisa hai — tez, halka, jalन wala, marodh wala, ya dhak-dhak wala?"
+      mr: "tras kasa aahe — teekshna, ha lka, jalnyasarkha, aakadalyasarkha, ki dhadakanyasarkha?"
+    input_type: single_select
+    options: [sharp, dull, burning, cramping, throbbing, other]
+    grammar: character.gbnf
+    next: radiation
+
+  radiation:
+    type: slot_fill
+    slot: radiation
+    question:
+      en: "Does it spread or move to any other part of the body?"
+      hi: "kya yeh dard sharir ke kisi aur hisse mein bhi jaata hai?"
+      mr: "he dukhane sharirachya dusarya bhagat pasarte ka?"
+    input_type: yesno
+    grammar: yesno.gbnf
+    next:
+      branch_on: radiation
+      yes: radiation_detail
+      no: associations
+
+  radiation_detail:
+    type: slot_fill
+    slot: radiation_location
+    question:
+      en: "Where does it spread to?"
+      hi: "yeh kahaan tak jaata hai?"
+      mr: "he kuthparyant pasarte?"
+    input_type: body_location
+    grammar: body_location.gbnf
+    next: associations
+
+  associations:
+    type: slot_fill
+    slot: associations
+    question:
+      en: "Any other symptoms along with this — fever, vomiting, nausea, sweating, breathlessness?"
+      hi: "iske saath aur koi lakshan — bukhaar, ulti, jee michlaana, paseena, saans lene mein takleef?"
+      mr: "yasobat itar kahi lakshan — taap, ulti, mळमळ, ghaam, shwaas ghyayla tras?"
+    input_type: multi_select
+    options: [fever, vomiting, nausea, sweating, breathlessness, none, other]
+    grammar: multi_select.gbnf
+    next: time_course
+
+  time_course:
+    type: slot_fill
+    slot: time_course
+    question:
+      en: "Is it constant, or does it come and go?"
+      hi: "yeh lagataar hai ya beech-beech mein aata hai?"
+      mr: "he satat aahe ki madhun madhun yete?"
+    input_type: single_select
+    options: [constant, intermittent, worsening_over_time, improving_over_time]
+    grammar: time_course.gbnf
+    next: exacerbating_relieving
+
+  exacerbating_relieving:
+    type: slot_fill
+    slot: exacerbating_relieving
+    question:
+      en: "Does anything make it better or worse — movement, food, rest, medicine?"
+      hi: "kisi cheez se yeh badhta ya kam hota hai — hilne se, khaane se, aaram se, dawa se?"
+      mr: "koneetahri goshtine he vadhte ki kami hote — halnyane, khanyane, vishrantine, aushadhane?"
+    input_type: single_select
+    options: [worse_on_movement, better_on_rest, worse_after_food, better_after_food, worse_at_night, no_pattern, other]
+    grammar: exacerbating_relieving.gbnf
+    next: severity
+
+  severity:
+    type: slot_fill
+    slot: severity
+    question:
+      en: "On a scale of 0 to 10, how bad is it right now?"
+      hi: "0 se 10 tak, abhi yeh kitna zyada hai?"
+      mr: "0 te 10 madhe, sadhya he kiti tras dete?"
+    input_type: scale_0_10
+    grammar: severity.gbnf
+    next: red_flag_check
+
+  red_flag_check:
+    type: rule
+    description: >
+      Deterministic rule evaluation only — no LLM call. Rules run in order;
+      first match wins per flag category. Extend this list as new red-flag
+      patterns are validated; do not let the LLM infer red flags itself.
+    rules:
+      - id: cardiac_pattern
+        if: "site == 'chest' and severity >= 7"
+        set_flag: possible_cardiac_emergency
+        triage_level: emergency
+      - id: stroke_pattern
+        if: "site == 'head' and onset == 'sudden' and severity >= 8"
+        set_flag: possible_stroke
+        triage_level: emergency
+      - id: appendicitis_pattern
+        if: "site in ['abdomen_lower_right'] and 'fever' in associations"
+        set_flag: possible_appendicitis_pattern
+        triage_level: priority
+      - id: default_moderate
+        if: "severity >= 6"
+        set_flag: null
+        triage_level: priority
+      - id: default_routine
+        if: "true"
+        set_flag: null
+        triage_level: routine
+    next: end
+
+  end:
+    type: terminal
+    description: >
+      Hands off to summary generation (LLM produces the human-readable
+      encounter summary from filled slots — this step IS free-form LLM
+      output, but downstream of fully deterministic slot-filling, so
+      hallucination risk is bounded to phrasing, not to the underlying facts).

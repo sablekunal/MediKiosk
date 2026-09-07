@@ -1,0 +1,5 @@
+# nidana.gbnf — for nidana / causative factors (Dashavidha)
+root    ::= "[" ws "]" | "[" ws item (ws "," ws item)* ws "]"
+item    ::= "\"" cause "\""
+cause   ::= "dietary" | "seasonal" | "psychological" | "hereditary" | "occupational" | "other" | "unknown"
+ws      ::= [ \t]*

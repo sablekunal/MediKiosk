@@ -1,0 +1,2 @@
+# koshtha.gbnf — for koshtha / bowel nature (Dashavidha)
+root ::= "mridu" | "madhyama" | "krura"

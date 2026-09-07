@@ -1,0 +1,2 @@
+# time_course.gbnf — for time_course (SOCRATES)
+root ::= "constant" | "intermittent" | "worsening_over_time" | "improving_over_time"

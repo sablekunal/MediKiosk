@@ -1,0 +1,8 @@
+# duration.gbnf — for onset (SOCRATES)
+# Produces a compound value matching the canonical schema convention,
+# e.g. "3_days_gradual". The engine splits on "_" into
+# {duration_value, duration_unit, onset_type} before writing the slot.
+root       ::= number "_" unit "_" onset
+number     ::= [1-9] [0-9]?
+unit       ::= "hours" | "days" | "weeks" | "months" | "years"
+onset      ::= "sudden" | "gradual"

@@ -1,0 +1,3 @@
+# exacerbating_relieving.gbnf — for exacerbating_relieving (SOCRATES)
+root ::= "worse_on_movement" | "better_on_rest" | "worse_after_food"
+       | "better_after_food" | "worse_at_night" | "no_pattern" | "other"

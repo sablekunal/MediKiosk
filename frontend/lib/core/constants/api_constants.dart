@@ -33,4 +33,5 @@ class ApiConstants {
   static const String sessionStart = '/intake/session/start';
   static String sessionTurn(String sessionId) => '/intake/session/$sessionId/turn';
   static String encounterCanonical(String sessionId) => '/encounter/$sessionId/canonical';
+  static String encounterFhir(String sessionId) => '/encounter/$sessionId/fhir';
 }

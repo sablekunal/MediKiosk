@@ -1,0 +1,107 @@
+# Dashavidha Pariksha (AYUSH) history-taking tree — generic, framework-level
+# Consumed by the same tree_engine/engine.py state machine as socrates.yaml:
+#   (current_node_id, slot_value) -> next_node_id
+#
+# Scope: this tree captures the AYUSH-specific assessment parameters called
+# out in problem_statement.md §1.1 (Prakriti, Vikriti, Agni, Koshtha,
+# Ahara-Vihara, Nidana) as direct patient-facing slot-fills. It is designed
+# to run as a second pass alongside (not instead of) a socrates_generic_v1
+# pass for the presenting complaint — same complaint_id, framework: dashavidha
+# entries appended to history[] per canonical_encounter_schema.md.
+#
+# Samprapti (pathogenesis) is deliberately NOT a slot_fill node here: it is a
+# clinical synthesis derived from the other nine filled slots plus the
+# SOCRATES complaint data, produced downstream during summary generation —
+# same philosophy as the free-form LLM step at socrates.yaml's `end` node.
+# Asking a patient to directly state their own "pathogenesis" is not a
+# meaningful question; asking them their digestion, bowel nature, diet, and
+# probable causative factors is, and those feed the synthesis.
+#
+# `question.*` keys are BCP-47 language codes, same convention as
+# socrates.yaml. Demo build wires hi + en; engine falls back to en.
+
+tree_id: dashavidha_generic_v1
+description: >
+  Generic Dashavidha Pariksha (AYUSH tenfold-examination) tree, capturing
+  constitutional and lifestyle parameters alongside a presenting complaint.
+  Fills history[].slots for one complaint_id per pass, framework: dashavidha.
+entry_node: prakriti
+
+nodes:
+
+  prakriti:
+    type: slot_fill
+    slot: prakriti
+    question:
+      en: "Which best describes your natural body and mind constitution — has this been consistent since childhood?"
+      hi: "aapka sharir aur swabhav bachpan se kaisa raha hai — halka aur chanchal, garam aur tej, ya bhaari aur sthir?"
+    input_type: single_select
+    options: [vata, pitta, kapha, vata_pitta, pitta_kapha, vata_kapha, tridoshaja, unknown]
+    grammar: prakriti.gbnf
+    next: vikriti
+
+  vikriti:
+    type: slot_fill
+    slot: vikriti
+    question:
+      en: "Right now, which of these feels out of balance compared to how you normally are?"
+      hi: "abhi filhaal aapko apne aap mein kya asantulan mehsoos ho raha hai?"
+    input_type: single_select
+    options: [vata_vriddhi, pitta_vriddhi, kapha_vriddhi, vata_kshaya, pitta_kshaya, kapha_kshaya, none, unknown]
+    grammar: vikriti.gbnf
+    next: agni
+
+  agni:
+    type: slot_fill
+    slot: agni
+    question:
+      en: "How is your digestion generally — slow and heavy, sharp and quick, irregular, or balanced?"
+      hi: "aapka pachan aam taur par kaisa rehta hai — dheema, tez, aniyamit, ya santulit?"
+    input_type: single_select
+    options: [manda, tikshna, sama, vishama]
+    grammar: agni.gbnf
+    next: koshtha
+
+  koshtha:
+    type: slot_fill
+    slot: koshtha
+    question:
+      en: "How would you describe your usual bowel nature — soft/loose, moderate, or hard/constipated?"
+      hi: "aapka pet aam taur par kaisa rehta hai — naram, madhyam, ya kathin/kabz wala?"
+    input_type: single_select
+    options: [mridu, madhyama, krura]
+    grammar: koshtha.gbnf
+    next: ahara_vihara
+
+  ahara_vihara:
+    type: slot_fill
+    slot: ahara_vihara
+    question:
+      en: "Tell me about your diet and daily routine — vegetarian or non-vegetarian, sleep pattern, and activity level."
+      hi: "apna khaana aur dinacharya batayein — shakahari ya mansahari, neend, aur sharirik gatividhi ka star."
+    input_type: multi_select
+    options: [diet_veg, diet_nonveg, diet_mixed, sleep_disturbed, sleep_normal, sedentary, active, stress_high, stress_low, other]
+    grammar: ahara_vihara.gbnf
+    next: nidana
+
+  nidana:
+    type: slot_fill
+    slot: nidana
+    question:
+      en: "What do you think brought this on — diet, season/weather, stress, family history, or work-related?"
+      hi: "aapko kya lagta hai iski wajah kya hai — khaana, mausam, tanaav, paarivarik itihaas, ya kaam se juda?"
+    input_type: multi_select
+    options: [dietary, seasonal, psychological, hereditary, occupational, other, unknown]
+    grammar: nidana.gbnf
+    next: end
+
+  end:
+    type: terminal
+    description: >
+      Hands off to summary generation. Samprapti (pathogenesis) is
+      synthesized here by the LLM from prakriti/vikriti/agni/koshtha/
+      ahara_vihara/nidana plus the linked SOCRATES complaint data — this
+      step IS free-form LLM output, downstream of fully deterministic
+      slot-filling, so hallucination risk is bounded to phrasing and
+      clinical framing, not to the underlying facts. Same bounding
+      philosophy as socrates.yaml's `end` node.

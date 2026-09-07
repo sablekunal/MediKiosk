@@ -1,0 +1,2 @@
+# yesno.gbnf — for radiation (SOCRATES) and any other binary slot
+root ::= "yes" | "no"

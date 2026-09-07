@@ -1,0 +1,6 @@
+# multi_select.gbnf — for associations (SOCRATES)
+# Produces a JSON array of strings; empty array represents "none".
+root    ::= "[" ws "]" | "[" ws item (ws "," ws item)* ws "]"
+item    ::= "\"" symptom "\""
+symptom ::= "fever" | "vomiting" | "nausea" | "sweating" | "breathlessness" | "other"
+ws      ::= [ \t]*

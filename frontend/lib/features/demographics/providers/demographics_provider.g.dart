@@ -9,52 +9,52 @@ part of 'demographics_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(PatientRegistration)
-final patientRegistrationProvider = PatientRegistrationProvider._();
+@ProviderFor(PatientFormController)
+final patientFormControllerProvider = PatientFormControllerProvider._();
 
-final class PatientRegistrationProvider
-    extends $NotifierProvider<PatientRegistration, Patient> {
-  PatientRegistrationProvider._()
+final class PatientFormControllerProvider
+    extends $NotifierProvider<PatientFormController, PatientFormData> {
+  PatientFormControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'patientRegistrationProvider',
+        name: r'patientFormControllerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$patientRegistrationHash();
+  String debugGetCreateSourceHash() => _$patientFormControllerHash();
 
   @$internal
   @override
-  PatientRegistration create() => PatientRegistration();
+  PatientFormController create() => PatientFormController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Patient value) {
+  Override overrideWithValue(PatientFormData value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<Patient>(value),
+      providerOverride: $SyncValueProvider<PatientFormData>(value),
     );
   }
 }
 
-String _$patientRegistrationHash() =>
-    r'83970c52f0e964408bdbefc757310c04fa8c898f';
+String _$patientFormControllerHash() =>
+    r'874f9dcdece0a9961a084f9ee2b319c41dd01238';
 
-abstract class _$PatientRegistration extends $Notifier<Patient> {
-  Patient build();
+abstract class _$PatientFormController extends $Notifier<PatientFormData> {
+  PatientFormData build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<Patient, Patient>;
+    final ref = this.ref as $Ref<PatientFormData, PatientFormData>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<Patient, Patient>,
-              Patient,
+              AnyNotifier<PatientFormData, PatientFormData>,
+              PatientFormData,
               Object?,
               Object?
             >;
@@ -66,7 +66,7 @@ abstract class _$PatientRegistration extends $Notifier<Patient> {
 final sessionControllerProvider = SessionControllerProvider._();
 
 final class SessionControllerProvider
-    extends $NotifierProvider<SessionController, AsyncValue<SessionResponse?>> {
+    extends $NotifierProvider<SessionController, AsyncValue<TurnResponse?>> {
   SessionControllerProvider._()
     : super(
         from: null,
@@ -86,33 +86,29 @@ final class SessionControllerProvider
   SessionController create() => SessionController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<SessionResponse?> value) {
+  Override overrideWithValue(AsyncValue<TurnResponse?> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<SessionResponse?>>(value),
+      providerOverride: $SyncValueProvider<AsyncValue<TurnResponse?>>(value),
     );
   }
 }
 
-String _$sessionControllerHash() => r'dbdebb6687d56ba8fc9e14cdf370292f042020a6';
+String _$sessionControllerHash() => r'56b04e19b8292a854385a9493320734f9ffc250c';
 
 abstract class _$SessionController
-    extends $Notifier<AsyncValue<SessionResponse?>> {
-  AsyncValue<SessionResponse?> build();
+    extends $Notifier<AsyncValue<TurnResponse?>> {
+  AsyncValue<TurnResponse?> build();
   @$mustCallSuper
   @override
   void runBuild() {
     final ref =
-        this.ref
-            as $Ref<AsyncValue<SessionResponse?>, AsyncValue<SessionResponse?>>;
+        this.ref as $Ref<AsyncValue<TurnResponse?>, AsyncValue<TurnResponse?>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<
-                AsyncValue<SessionResponse?>,
-                AsyncValue<SessionResponse?>
-              >,
-              AsyncValue<SessionResponse?>,
+              AnyNotifier<AsyncValue<TurnResponse?>, AsyncValue<TurnResponse?>>,
+              AsyncValue<TurnResponse?>,
               Object?,
               Object?
             >;

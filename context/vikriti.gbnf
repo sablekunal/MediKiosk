@@ -1,0 +1,4 @@
+# vikriti.gbnf — for vikriti (Dashavidha)
+root ::= "vata_vriddhi" | "pitta_vriddhi" | "kapha_vriddhi"
+       | "vata_kshaya" | "pitta_kshaya" | "kapha_kshaya"
+       | "none" | "unknown"

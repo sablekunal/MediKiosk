@@ -1,0 +1,4 @@
+# prakriti.gbnf — for prakriti (Dashavidha)
+root ::= "vata" | "pitta" | "kapha"
+       | "vata_pitta" | "pitta_kapha" | "vata_kapha"
+       | "tridoshaja" | "unknown"
