@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../providers/demographics_provider.dart';
-import '../../../intake/presentation/screens/intake_screen.dart';
+import '../../../../core/providers/language_provider.dart';
+import '../../../media/presentation/document_scan_screen.dart';
 
 class RegistrationScreen extends ConsumerStatefulWidget {
   const RegistrationScreen({super.key});
@@ -13,19 +14,25 @@ class RegistrationScreen extends ConsumerStatefulWidget {
 
 class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _givenNameCtrl = TextEditingController();
+  final _familyNameCtrl = TextEditingController();
+  final _dobCtrl = TextEditingController();
+  final _abhaCtrl = TextEditingController();
   String? _selectedGender;
-  final _dobController = TextEditingController();
 
   @override
   void dispose() {
-    _dobController.dispose();
+    _givenNameCtrl.dispose();
+    _familyNameCtrl.dispose();
+    _dobCtrl.dispose();
+    _abhaCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _selectDob() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(1990),
+      initialDate: DateTime(1985),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
@@ -41,136 +48,263 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     if (picked != null) {
       final formatted =
           '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-      _dobController.text = formatted;
-      ref.read(patientFormControllerProvider.notifier).updateBirthDate(formatted);
+      _dobCtrl.text = formatted;
+    }
+  }
+
+  void _quickSetAge(int age) {
+    final birthYear = DateTime.now().year - age;
+    _dobCtrl.text = '$birthYear-01-01';
+  }
+
+  Future<void> _proceed() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedGender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a gender / लिंग चुनें'),
+          backgroundColor: Color(0xFFEF5350),
+        ),
+      );
+      return;
+    }
+
+    final langCode = ref.read(languageControllerProvider);
+
+    final patient = PatientFormData(
+      givenName: _givenNameCtrl.text.trim(),
+      familyName: _familyNameCtrl.text.trim(),
+      birthDate: _dobCtrl.text.trim(),
+      gender: _selectedGender!,
+      identifier: _abhaCtrl.text.trim(),
+      language: langCode,
+    );
+
+    ref.read(patientFormControllerProvider.notifier).setPatient(patient);
+    await ref.read(sessionControllerProvider.notifier).startSession(patient);
+
+    final err = ref.read(sessionControllerProvider).error;
+    if (err != null) return; // error shown in UI
+
+    if (mounted) {
+      // Direct seamlessly to Document Scanning screen (Variant C Architecture workflow)
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DocumentScanScreen()),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final sessionState = ref.watch(sessionControllerProvider);
+    final langCode = ref.watch(languageControllerProvider);
+    final isHindi = langCode == 'hi';
+    final currentLang = supportedLanguages.firstWhere((l) => l.code == langCode);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F1117),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1D27),
-        title: Text(
-          'Patient Registration',
-          style: TextStyle(color: Colors.white, fontSize: 22.sp, fontWeight: FontWeight.bold),
-        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        title: Text(
+          isHindi ? 'मरीज़ पंजीकरण (Registration)' : 'Patient Registration',
+          style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          // Language badge
+          Container(
+            margin: EdgeInsets.only(right: 16.w),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4A90D9).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: const Color(0xFF4A90D9).withValues(alpha: 0.4)),
+            ),
+            child: Text(
+              currentLang.nativeLabel,
+              style: TextStyle(color: const Color(0xFF4A90D9), fontSize: 13.sp, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(32.r),
+        padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 32.h),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Enter Patient Details',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.bold,
-                ),
+                isHindi ? 'मरीज़ का विवरण भरें' : 'Enter Patient Details',
+                style: TextStyle(color: Colors.white, fontSize: 28.sp, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: 6.h),
               Text(
-                'These details will be pre-filled to start your intake session.',
-                style: TextStyle(color: Colors.white54, fontSize: 15.sp),
+                isHindi
+                    ? 'ओपीडी परामर्श को तीव्र और सटीक बनाने के लिए बुनियादी विवरण दर्ज करें।'
+                    : 'Fill basic demographics to streamline and prioritize your OPD consultation.',
+                style: TextStyle(color: Colors.white54, fontSize: 14.sp),
               ),
-              SizedBox(height: 36.h),
+              SizedBox(height: 32.h),
 
-              // ─── Name Row ────────────────────────────────────────────
+              // Name row
               Row(
                 children: [
                   Expanded(
-                    child: _buildField(
-                      label: 'First Name',
+                    child: _field(
+                      controller: _givenNameCtrl,
+                      label: isHindi ? 'पहला नाम (First Name) *' : 'First Name *',
                       icon: Icons.person_outline,
-                      onChanged: (v) =>
-                          ref.read(patientFormControllerProvider.notifier).updateGivenName(v),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                   ),
                   SizedBox(width: 20.w),
                   Expanded(
-                    child: _buildField(
-                      label: 'Last Name',
+                    child: _field(
+                      controller: _familyNameCtrl,
+                      label: isHindi ? 'उपनाम (Last Name)' : 'Last Name',
                       icon: Icons.person_outline,
-                      onChanged: (v) =>
-                          ref.read(patientFormControllerProvider.notifier).updateFamilyName(v),
                     ),
                   ),
                 ],
               ),
               SizedBox(height: 24.h),
 
-              // ─── DOB ─────────────────────────────────────────────────
-              _buildField(
-                label: 'Date of Birth',
-                icon: Icons.calendar_today_outlined,
-                controller: _dobController,
-                readOnly: true,
-                onTap: _selectDob,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+              // DOB + Quick Age Shortcuts
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: _field(
+                      controller: _dobCtrl,
+                      label: isHindi ? 'जन्म तिथि (YYYY-MM-DD) *' : 'Date of Birth (YYYY-MM-DD) *',
+                      icon: Icons.calendar_today_outlined,
+                      readOnly: true,
+                      onTap: _selectDob,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  // Quick Age buttons for elderly or rural patients
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isHindi ? 'या लगभग आयु चुनें (Quick Age):' : 'Or select approximate age:',
+                          style: TextStyle(color: Colors.white60, fontSize: 13.sp),
+                        ),
+                        SizedBox(height: 6.h),
+                        Wrap(
+                          spacing: 8.w,
+                          runSpacing: 6.h,
+                          children: [20, 30, 45, 60, 70].map((age) {
+                            return ActionChip(
+                              label: Text('$age yrs', style: TextStyle(color: Colors.white, fontSize: 13.sp)),
+                              backgroundColor: const Color(0xFF1A1D27),
+                              side: const BorderSide(color: Color(0xFF3A3D4A)),
+                              onPressed: () => _quickSetAge(age),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 24.h),
 
-              // ─── Gender ───────────────────────────────────────────────
+              // Gender
               Text(
-                'Gender',
-                style: TextStyle(color: Colors.white70, fontSize: 16.sp),
+                isHindi ? 'लिंग (Gender) *' : 'Gender *',
+                style: TextStyle(color: Colors.white70, fontSize: 15.sp),
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 10.h),
               Wrap(
                 spacing: 12.w,
-                children: ['male', 'female', 'other', 'unknown'].map((g) {
-                  final selected = _selectedGender == g;
+                runSpacing: 10.h,
+                children: [
+                  {'val': 'male', 'en': 'Male', 'hi': 'पुरुष (Male)'},
+                  {'val': 'female', 'en': 'Female', 'hi': 'महिला (Female)'},
+                  {'val': 'other', 'en': 'Other', 'hi': 'अन्य (Other)'},
+                ].map((g) {
+                  final sel = _selectedGender == g['val'];
                   return ChoiceChip(
                     label: Text(
-                      g[0].toUpperCase() + g.substring(1),
+                      isHindi ? g['hi']! : g['en']!,
                       style: TextStyle(
-                        color: selected ? Colors.white : Colors.white60,
+                        color: sel ? Colors.white : Colors.white60,
                         fontSize: 16.sp,
+                        fontWeight: sel ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
-                    selected: selected,
+                    selected: sel,
                     selectedColor: const Color(0xFF4A90D9),
                     backgroundColor: const Color(0xFF1A1D27),
                     side: BorderSide(
-                      color: selected
-                          ? const Color(0xFF4A90D9)
-                          : const Color(0xFF3A3D4A),
+                      color: sel ? const Color(0xFF4A90D9) : const Color(0xFF3A3D4A),
                     ),
-                    onSelected: (_) {
-                      setState(() => _selectedGender = g);
-                      ref
-                          .read(patientFormControllerProvider.notifier)
-                          .updateGender(g);
-                    },
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                    onSelected: (_) => setState(() => _selectedGender = g['val']),
                   );
                 }).toList(),
               ),
               SizedBox(height: 24.h),
 
-              // ─── ABHA ID (optional) ───────────────────────────────────
-              _buildField(
-                label: 'ABHA ID (Optional)',
-                icon: Icons.fingerprint,
-                onChanged: (v) =>
-                    ref.read(patientFormControllerProvider.notifier).updateIdentifier(v),
+              // ABHA ID (Instant Consent Initiation)
+              Container(
+                padding: EdgeInsets.all(16.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A2234),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(color: const Color(0xFF4A90D9).withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.fingerprint, color: Color(0xFF4A90D9)),
+                        SizedBox(width: 8.w),
+                        Text(
+                          isHindi ? 'आयुष्मान भारत हेल्थ अकाउंट (ABHA ID)' : 'ABHA ID / Ayushman Bharat',
+                          style: TextStyle(
+                            color: const Color(0xFF4A90D9),
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF26A69A).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Text(
+                            'ABDM Integrated',
+                            style: TextStyle(color: const Color(0xFF26A69A), fontSize: 11.sp, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10.h),
+                    _field(
+                      controller: _abhaCtrl,
+                      label: isHindi ? 'ABHA पता (वैकल्पिक, उदा. name@abdm)' : 'ABHA Number / Address (Optional)',
+                      icon: Icons.qr_code_2_rounded,
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 48.h),
+              SizedBox(height: 36.h),
 
-              // ─── Submit ───────────────────────────────────────────────
+              // Submit
               SizedBox(
                 width: double.infinity,
                 child: sessionState.maybeWhen(
@@ -178,55 +312,40 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                     child: CircularProgressIndicator(color: Color(0xFF4A90D9)),
                   ),
                   orElse: () => ElevatedButton(
-                    onPressed: () async {
-                      if (!_formKey.currentState!.validate()) return;
-                      if (_selectedGender == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please select a gender')),
-                        );
-                        return;
-                      }
-                      final patient = ref.read(patientFormControllerProvider);
-                      await ref
-                          .read(sessionControllerProvider.notifier)
-                          .startSession(patient);
-                      final error = ref.read(sessionControllerProvider).error;
-                      if (error != null) return; // stays on error state
-                      if (mounted) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => const IntakeScreen()),
-                        );
-                      }
-                    },
+                    onPressed: _proceed,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4A90D9),
                       padding: EdgeInsets.symmetric(vertical: 20.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                     ),
-                    child: Text(
-                      'START INTAKE SESSION',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          isHindi ? 'प्रारंभ करें (START INTAKE)' : 'START INTAKE SESSION',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                      ],
                     ),
                   ),
                 ),
               ),
 
-              // ─── Error message ────────────────────────────────────────
               if (sessionState.hasError) ...[
                 SizedBox(height: 16.h),
                 Container(
                   padding: EdgeInsets.all(16.r),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                    border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     children: [
@@ -234,7 +353,9 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
-                          'Could not connect to server. Check your connection and try again.',
+                          isHindi
+                              ? 'सर्वर से संपर्क नहीं हो सका। कृपया कनेक्शन जांचें।'
+                              : 'Could not start session. Please check your connection to compute box.',
                           style: TextStyle(color: Colors.redAccent, fontSize: 14.sp),
                         ),
                       ),
@@ -249,25 +370,23 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     );
   }
 
-  Widget _buildField({
+  Widget _field({
+    required TextEditingController controller,
     required String label,
     required IconData icon,
-    TextEditingController? controller,
     bool readOnly = false,
     VoidCallback? onTap,
-    ValueChanged<String>? onChanged,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
       onTap: onTap,
-      onChanged: onChanged,
       validator: validator,
       style: TextStyle(color: Colors.white, fontSize: 18.sp),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white54, fontSize: 16.sp),
+        labelStyle: TextStyle(color: Colors.white54, fontSize: 15.sp),
         prefixIcon: Icon(icon, color: Colors.white38),
         filled: true,
         fillColor: const Color(0xFF1A1D27),
@@ -286,6 +405,10 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14.r),
           borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14.r),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
         ),
         contentPadding: EdgeInsets.symmetric(vertical: 18.h, horizontal: 16.w),
       ),

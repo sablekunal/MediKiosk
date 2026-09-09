@@ -20,7 +20,7 @@ final class PatientFormControllerProvider
         argument: null,
         retry: null,
         name: r'patientFormControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,7 +42,7 @@ final class PatientFormControllerProvider
 }
 
 String _$patientFormControllerHash() =>
-    r'874f9dcdece0a9961a084f9ee2b319c41dd01238';
+    r'2a16f467080a0edc996b08641c51621ba8cc1861';
 
 abstract class _$PatientFormController extends $Notifier<PatientFormData> {
   PatientFormData build();
@@ -73,7 +73,7 @@ final class SessionControllerProvider
         argument: null,
         retry: null,
         name: r'sessionControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -94,7 +94,7 @@ final class SessionControllerProvider
   }
 }
 
-String _$sessionControllerHash() => r'56b04e19b8292a854385a9493320734f9ffc250c';
+String _$sessionControllerHash() => r'e3ebba2acc89269b2eca4ec03c6f447896e650c4';
 
 abstract class _$SessionController
     extends $Notifier<AsyncValue<TurnResponse?>> {

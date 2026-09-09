@@ -17,7 +17,7 @@ mixin _$PatientFormData {
  String get givenName; String get familyName; String get birthDate;// YYYY-MM-DD
  String get gender;// male | female | other | unknown
  String get identifier;// ABHA ID
- String get language;
+ String get language; List<String> get scannedDocuments; String get ocrSummary;
 /// Create a copy of PatientFormData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $PatientFormDataCopyWith<PatientFormData> get copyWith => _$PatientFormDataCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatientFormData&&(identical(other.givenName, givenName) || other.givenName == givenName)&&(identical(other.familyName, familyName) || other.familyName == familyName)&&(identical(other.birthDate, birthDate) || other.birthDate == birthDate)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.identifier, identifier) || other.identifier == identifier)&&(identical(other.language, language) || other.language == language));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatientFormData&&(identical(other.givenName, givenName) || other.givenName == givenName)&&(identical(other.familyName, familyName) || other.familyName == familyName)&&(identical(other.birthDate, birthDate) || other.birthDate == birthDate)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.identifier, identifier) || other.identifier == identifier)&&(identical(other.language, language) || other.language == language)&&const DeepCollectionEquality().equals(other.scannedDocuments, scannedDocuments)&&(identical(other.ocrSummary, ocrSummary) || other.ocrSummary == ocrSummary));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,givenName,familyName,birthDate,gender,identifier,language);
+int get hashCode => Object.hash(runtimeType,givenName,familyName,birthDate,gender,identifier,language,const DeepCollectionEquality().hash(scannedDocuments),ocrSummary);
 
 @override
 String toString() {
-  return 'PatientFormData(givenName: $givenName, familyName: $familyName, birthDate: $birthDate, gender: $gender, identifier: $identifier, language: $language)';
+  return 'PatientFormData(givenName: $givenName, familyName: $familyName, birthDate: $birthDate, gender: $gender, identifier: $identifier, language: $language, scannedDocuments: $scannedDocuments, ocrSummary: $ocrSummary)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $PatientFormDataCopyWith<$Res>  {
   factory $PatientFormDataCopyWith(PatientFormData value, $Res Function(PatientFormData) _then) = _$PatientFormDataCopyWithImpl;
 @useResult
 $Res call({
- String givenName, String familyName, String birthDate, String gender, String identifier, String language
+ String givenName, String familyName, String birthDate, String gender, String identifier, String language, List<String> scannedDocuments, String ocrSummary
 });
 
 
@@ -65,7 +65,7 @@ class _$PatientFormDataCopyWithImpl<$Res>
 
 /// Create a copy of PatientFormData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? givenName = null,Object? familyName = null,Object? birthDate = null,Object? gender = null,Object? identifier = null,Object? language = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? givenName = null,Object? familyName = null,Object? birthDate = null,Object? gender = null,Object? identifier = null,Object? language = null,Object? scannedDocuments = null,Object? ocrSummary = null,}) {
   return _then(_self.copyWith(
 givenName: null == givenName ? _self.givenName : givenName // ignore: cast_nullable_to_non_nullable
 as String,familyName: null == familyName ? _self.familyName : familyName // ignore: cast_nullable_to_non_nullable
@@ -73,6 +73,8 @@ as String,birthDate: null == birthDate ? _self.birthDate : birthDate // ignore: 
 as String,gender: null == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
 as String,identifier: null == identifier ? _self.identifier : identifier // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as String,scannedDocuments: null == scannedDocuments ? _self.scannedDocuments : scannedDocuments // ignore: cast_nullable_to_non_nullable
+as List<String>,ocrSummary: null == ocrSummary ? _self.ocrSummary : ocrSummary // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -158,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String givenName,  String familyName,  String birthDate,  String gender,  String identifier,  String language)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String givenName,  String familyName,  String birthDate,  String gender,  String identifier,  String language,  List<String> scannedDocuments,  String ocrSummary)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PatientFormData() when $default != null:
-return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_that.identifier,_that.language);case _:
+return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_that.identifier,_that.language,_that.scannedDocuments,_that.ocrSummary);case _:
   return orElse();
 
 }
@@ -179,10 +181,10 @@ return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String givenName,  String familyName,  String birthDate,  String gender,  String identifier,  String language)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String givenName,  String familyName,  String birthDate,  String gender,  String identifier,  String language,  List<String> scannedDocuments,  String ocrSummary)  $default,) {final _that = this;
 switch (_that) {
 case _PatientFormData():
-return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_that.identifier,_that.language);case _:
+return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_that.identifier,_that.language,_that.scannedDocuments,_that.ocrSummary);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +201,10 @@ return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String givenName,  String familyName,  String birthDate,  String gender,  String identifier,  String language)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String givenName,  String familyName,  String birthDate,  String gender,  String identifier,  String language,  List<String> scannedDocuments,  String ocrSummary)?  $default,) {final _that = this;
 switch (_that) {
 case _PatientFormData() when $default != null:
-return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_that.identifier,_that.language);case _:
+return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_that.identifier,_that.language,_that.scannedDocuments,_that.ocrSummary);case _:
   return null;
 
 }
@@ -214,7 +216,7 @@ return $default(_that.givenName,_that.familyName,_that.birthDate,_that.gender,_t
 
 
 class _PatientFormData implements PatientFormData {
-  const _PatientFormData({this.givenName = '', this.familyName = '', this.birthDate = '', this.gender = '', this.identifier = '', this.language = 'en'});
+  const _PatientFormData({this.givenName = '', this.familyName = '', this.birthDate = '', this.gender = '', this.identifier = '', this.language = 'en', final  List<String> scannedDocuments = const [], this.ocrSummary = ''}): _scannedDocuments = scannedDocuments;
   
 
 @override@JsonKey() final  String givenName;
@@ -226,6 +228,14 @@ class _PatientFormData implements PatientFormData {
 @override@JsonKey() final  String identifier;
 // ABHA ID
 @override@JsonKey() final  String language;
+ final  List<String> _scannedDocuments;
+@override@JsonKey() List<String> get scannedDocuments {
+  if (_scannedDocuments is EqualUnmodifiableListView) return _scannedDocuments;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_scannedDocuments);
+}
+
+@override@JsonKey() final  String ocrSummary;
 
 /// Create a copy of PatientFormData
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +247,16 @@ _$PatientFormDataCopyWith<_PatientFormData> get copyWith => __$PatientFormDataCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatientFormData&&(identical(other.givenName, givenName) || other.givenName == givenName)&&(identical(other.familyName, familyName) || other.familyName == familyName)&&(identical(other.birthDate, birthDate) || other.birthDate == birthDate)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.identifier, identifier) || other.identifier == identifier)&&(identical(other.language, language) || other.language == language));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatientFormData&&(identical(other.givenName, givenName) || other.givenName == givenName)&&(identical(other.familyName, familyName) || other.familyName == familyName)&&(identical(other.birthDate, birthDate) || other.birthDate == birthDate)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.identifier, identifier) || other.identifier == identifier)&&(identical(other.language, language) || other.language == language)&&const DeepCollectionEquality().equals(other._scannedDocuments, _scannedDocuments)&&(identical(other.ocrSummary, ocrSummary) || other.ocrSummary == ocrSummary));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,givenName,familyName,birthDate,gender,identifier,language);
+int get hashCode => Object.hash(runtimeType,givenName,familyName,birthDate,gender,identifier,language,const DeepCollectionEquality().hash(_scannedDocuments),ocrSummary);
 
 @override
 String toString() {
-  return 'PatientFormData(givenName: $givenName, familyName: $familyName, birthDate: $birthDate, gender: $gender, identifier: $identifier, language: $language)';
+  return 'PatientFormData(givenName: $givenName, familyName: $familyName, birthDate: $birthDate, gender: $gender, identifier: $identifier, language: $language, scannedDocuments: $scannedDocuments, ocrSummary: $ocrSummary)';
 }
 
 
@@ -257,7 +267,7 @@ abstract mixin class _$PatientFormDataCopyWith<$Res> implements $PatientFormData
   factory _$PatientFormDataCopyWith(_PatientFormData value, $Res Function(_PatientFormData) _then) = __$PatientFormDataCopyWithImpl;
 @override @useResult
 $Res call({
- String givenName, String familyName, String birthDate, String gender, String identifier, String language
+ String givenName, String familyName, String birthDate, String gender, String identifier, String language, List<String> scannedDocuments, String ocrSummary
 });
 
 
@@ -274,7 +284,7 @@ class __$PatientFormDataCopyWithImpl<$Res>
 
 /// Create a copy of PatientFormData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? givenName = null,Object? familyName = null,Object? birthDate = null,Object? gender = null,Object? identifier = null,Object? language = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? givenName = null,Object? familyName = null,Object? birthDate = null,Object? gender = null,Object? identifier = null,Object? language = null,Object? scannedDocuments = null,Object? ocrSummary = null,}) {
   return _then(_PatientFormData(
 givenName: null == givenName ? _self.givenName : givenName // ignore: cast_nullable_to_non_nullable
 as String,familyName: null == familyName ? _self.familyName : familyName // ignore: cast_nullable_to_non_nullable
@@ -282,6 +292,8 @@ as String,birthDate: null == birthDate ? _self.birthDate : birthDate // ignore: 
 as String,gender: null == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
 as String,identifier: null == identifier ? _self.identifier : identifier // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as String,scannedDocuments: null == scannedDocuments ? _self._scannedDocuments : scannedDocuments // ignore: cast_nullable_to_non_nullable
+as List<String>,ocrSummary: null == ocrSummary ? _self.ocrSummary : ocrSummary // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

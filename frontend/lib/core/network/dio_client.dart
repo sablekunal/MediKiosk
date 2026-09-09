@@ -2,9 +2,12 @@ import 'package:dio/dio.dart';
 import '../constants/api_constants.dart';
 
 class DioClient {
+  static final DioClient _instance = DioClient._internal();
+  factory DioClient() => _instance;
+
   final Dio _dio;
 
-  DioClient()
+  DioClient._internal()
       : _dio = Dio(
           BaseOptions(
             baseUrl: ApiConstants.baseUrl,
@@ -45,5 +48,8 @@ class DioClient {
     );
   }
 
-  Dio get dio => _dio;
+  Dio get dio {
+    _dio.options.baseUrl = ApiConstants.baseUrl;
+    return _dio;
+  }
 }

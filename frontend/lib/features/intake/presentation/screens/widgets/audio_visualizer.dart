@@ -10,7 +10,6 @@ class AudioVisualizer extends StatefulWidget {
 
 class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  final List<double> _barHeights = List.generate(10, (index) => 0.2 + (index * 0.08));
 
   @override
   void initState() {

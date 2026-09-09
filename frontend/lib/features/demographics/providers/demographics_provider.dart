@@ -20,10 +20,12 @@ abstract class PatientFormData with _$PatientFormData {
     @Default('') String gender,      // male | female | other | unknown
     @Default('') String identifier,  // ABHA ID
     @Default('en') String language,
+    @Default([]) List<String> scannedDocuments,
+    @Default('') String ocrSummary,
   }) = _PatientFormData;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PatientFormController extends _$PatientFormController {
   @override
   PatientFormData build() => const PatientFormData();
@@ -33,18 +35,28 @@ class PatientFormController extends _$PatientFormController {
   void updateBirthDate(String v) => state = state.copyWith(birthDate: v);
   void updateGender(String v) => state = state.copyWith(gender: v.toLowerCase());
   void updateIdentifier(String v) => state = state.copyWith(identifier: v);
+  void addScannedDocument(String ocrText) => state = state.copyWith(
+        scannedDocuments: [...state.scannedDocuments, ocrText],
+        ocrSummary: state.ocrSummary.isEmpty ? ocrText : '${state.ocrSummary}\n---\n$ocrText',
+      );
+  void setPatient(PatientFormData p) => state = p;
+  void reset() => state = const PatientFormData();
 }
 
 // ---------------------------------------------------------------------------
 // Session controller — single source of truth for the entire intake flow
 // ---------------------------------------------------------------------------
 
-@riverpod
+@Riverpod(keepAlive: true)
 class SessionController extends _$SessionController {
   @override
   AsyncValue<TurnResponse?> build() => const AsyncValue.data(null);
 
   String? get sessionId => state.value?.sessionId;
+
+  void setTurn(TurnResponse turn) {
+    state = AsyncValue.data(turn);
+  }
 
   /// Start a new session, pre-filling patient demographics so the backend
   /// immediately skips straight to the chief complaint question.
@@ -87,5 +99,10 @@ class SessionController extends _$SessionController {
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  /// Reset the entire intake session for the next patient
+  void resetSession() {
+    state = const AsyncValue.data(null);
   }
 }
